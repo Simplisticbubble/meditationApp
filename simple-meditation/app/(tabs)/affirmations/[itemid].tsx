@@ -5,7 +5,7 @@ import { GalleryPreviewData } from '@/constants/models/AffirmationCategory';
 import AFFIRMATION_GALLERY from '@/constants/affirmation-gallery';
 import AppGradient from '@/components/AppGradient';
 import { AntDesign } from '@expo/vector-icons';
-
+//importations
 const AffirmationPractice = () => {
     const {itemid} = useLocalSearchParams();
     const [affirmation, setAffirmation] =  useState<GalleryPreviewData>();
