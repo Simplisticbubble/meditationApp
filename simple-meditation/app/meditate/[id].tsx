@@ -59,5 +59,5 @@ const Meditate = () => {
     </View>
   )
 }
-
+//Should try to gorup things together
 export default Meditate
