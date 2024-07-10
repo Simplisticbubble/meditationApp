@@ -5,12 +5,16 @@ import AppGradient from '@/components/AppGradient'
 import { router, useLocalSearchParams } from 'expo-router'
 import { AntDesign } from '@expo/vector-icons'
 import CustomButton from '@/components/CustomButton'
+import {Audio} from 'expo-av'
+import { MEDITATION_DATA, AUDIO_FILES } from '@/constants/MeditationData'
 const Meditate = () => {
 
   const {id} = useLocalSearchParams();
 
   const [secondsRemaining, setSecondsRemaining] = useState(10);
   const [isMeditating,setIsMeditating] = useState(false);
+  const [audioSound,setSound] = useState<Audio.Sound>();
+  const [isPlayingAudio, setPlayingAudio]=useState(false);
 
   useEffect(()=>{
     let timerId: NodeJS.Timeout;
@@ -32,8 +36,40 @@ const Meditate = () => {
     }
   },[secondsRemaining,isMeditating])
 
+  useEffect(()=>{
+    return ()=>{
+      audioSound?.unloadAsync();
+    }
+  },[audioSound])
+
+  const toggleMeditationSessionStatus = async () => {
+    if(secondsRemaining===0) setSecondsRemaining(10);
+    setIsMeditating(!isMeditating);
+    await toggleSound();
+  }
+  const toggleSound = async () => {
+    const sound = audioSound?audioSound: await initialiseSound();
+    const status = await sound?.getStatusAsync();
+    if(status?.isLoaded&& !isPlayingAudio ){
+      await sound.playAsync();
+      setPlayingAudio(true);
+    }else{
+      await sound.pauseAsync();
+      setPlayingAudio(false);
+    }
+  }
+  const initialiseSound = async()=>{
+    const audioFileName = MEDITATION_DATA[Number(id)-1].audio;
+    const {sound} = await Audio.Sound.createAsync(
+      AUDIO_FILES[audioFileName]
+    );
+    setSound(sound);
+    return sound;
+  }
+
   const formattedTimeMinutes = String(Math.floor(secondsRemaining / 60)).padStart(2,'0');
   const formattedTimeSecond = String(secondsRemaining % 60).padStart(2,'0');
+
 
   return (
     <View className='flex-1'>
@@ -51,7 +87,7 @@ const Meditate = () => {
               </View>
           </View>
           <View className='mb-5'>
-            <CustomButton title='Start Meditation' onPress={()=>setIsMeditating(true)}/>
+            <CustomButton title='Start Meditation' onPress={toggleMeditationSessionStatus}/>
           </View>
       </AppGradient>
       </ImageBackground>
